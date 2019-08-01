@@ -18,11 +18,6 @@ public class NNIDemoTest {
     }
 
     @Test
-    public void testInsertLeftChild() {
-
-    }
-
-    @Test
     public void testBuildTree() {
         Node mock = new Node("2");
         Node a = new Node("10");
@@ -52,9 +47,10 @@ public class NNIDemoTest {
 
         Node finalRootStructure = NNIDemo.buildTree(listOfNodes);
 
-
-
     }
 
+
+    //    testIsSelfConflicting
+//    testIsParentConflicting
 
 }

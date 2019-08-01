@@ -3,7 +3,7 @@ package com.omilia.test;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
+/** -- Natural Numbers Interpretation Demo --
  * In an automated dialogue system phone numbers may be uttered in many ways with different digit groupings
  *
  * (e.g. 2106930664 may be uttered as "210 69 30 6 6 4" or "210 69 664" etc).
@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
  * If the caller says "twentyfive" this could be transcribed as "25" or "20 5".
  *
  * The application deals with some of these issues.
+ *      The BASE level algorithm states if the output number is a valid Greek telephone number
+ *      The ADVANCED level algorithm checks for possible ambiguities in number spelling and prints a list of interpretations (VALID or INVALID according to the base level)
  */
 
 public class NNIDemo {
@@ -19,7 +21,7 @@ public class NNIDemo {
         // ask the user for input phone number
         String inputPhoneNumber =  askUserForNumber();
 
-        // interpret number. edw 2 implemantations ena base ena advanced
+        // interpret number. Two implementations: one BASE one ADVANCED
         List<String> interpretedNumbers = interpretNumberAdvancedLevel(inputPhoneNumber);
         // List<String> interpretedNumbers = interpretNumberBaseLevel(inputPhoneNumber);
 
@@ -41,19 +43,6 @@ public class NNIDemo {
         return interpretedNumbers;
     }
 
-    // to interpretation tha ginei ws eksis:
-    // otan tha pairnw substring me 2 digits tote tha uparxoun multiple interpretations
-    // case 1: an to substring einai dekada p.x(30), tote koitaw to epomeno substring kai
-    // 1.1 an auto einai monopsifio tote (p.x 30 6)
-    //      1.1.1 to prwto interpretation einai to ena substring concat me to allo diladi 30 6 => 306
-    //      1.1.2 to deutero interpretation einai to ena substring + to allo(ws numbers) diladi => 36
-    // 1.2 an einai dipsifio tote (p.x 30 45)
-    //      exoume mono ena interpretation 3045
-    // case 2: an to substring den einai dekada (p.x 35)
-    // exoume 2 interpretations:
-    // 2.1 35
-    // 2.2 30 5 => 305
-
     private static List<String> interpretNumberAdvancedLevel(String telephoneNumber) {
 
         String [] numbers = telephoneNumber.split(" ");
@@ -66,11 +55,24 @@ public class NNIDemo {
 
         Node root = buildTree(listOfNodes);
 
-        // ksanakalw ti locate leaves gia na parw mia lista me ola ta leaves
+        // call locateLeaves again to get a list of all the final leaves
+        // we will use root a starter node and locate all the leaves (all the steps of our algorithm)
         List<Node> finalLeaves = new ArrayList<>();
         root.locateLeaves(finalLeaves);
-        List<String> interpretations = new ArrayList<>();
 
+        List<String> interpretations = new ArrayList<>(); // here we keep our interpretations, we will return and then print this list
+
+        findPathsInTheTree(finalLeaves, interpretations);
+
+        return interpretations;
+
+    }
+
+    /**
+     * This method will find all the paths in the tree(that is all the possible interpretations)
+     * and for every path it will add it to the interpretations List
+     * */
+    private static void findPathsInTheTree(List<Node> finalLeaves, List<String> interpretations) {
         for(Node leaf : finalLeaves) {
             String finalNumber = leaf.getValue();
             Node parent = leaf.getParent();
@@ -80,19 +82,10 @@ public class NNIDemo {
             }
             interpretations.add((finalNumber));
         }
-
-//        int i =0;
-//        for(String number : interpretations) {
-//            System.out.println("Interpretation " + i + ": " + number);
-//            i++;
-//        }
-
-        return interpretations;
-
-
     }
 
     public static Node buildTree(List<Node> listOfNodes) {
+        // First, we keep the root node (e.g Node with value "2")
         Node root = listOfNodes.get(0);
 
         for(Node incomingNode : listOfNodes) {
@@ -102,14 +95,14 @@ public class NNIDemo {
                 continue;
             }
 
-            // find the leaves in the existing structure
+            // We want to find the leaves in the existing structure. Wherever a leaf is, a new node can be added based on the tree logic
             List<Node> leaves = new ArrayList<>();
             root.locateLeaves(leaves);
 
             // insert the new node under all leaves accordingly
             for (Node leaf : leaves) {
-                Node incomingClone = new Node(incomingNode.getValue());
-                leaf.addChild(incomingClone);
+                Node incomingClone = new Node(incomingNode.getValue()); // e.g Node with value "10"
+                leaf.insertNode(incomingClone);
             }
 
         }
@@ -136,19 +129,17 @@ public class NNIDemo {
         return false;
     }
 
-    // ena test oti den einai null, h oti den exei kena
-    public static String askUserForNumber() { //TODO
+    private static String askUserForNumber() {
 
         Scanner sc = new Scanner(System.in);
-        System.out.println("Please press the number! Every grouping of digits must be separated by a space ' ' char");
-        boolean validInput = true;
 
+        System.out.println("Please press the number! Every grouping of digits must be separated by a space ' ' char");
         String number = sc.nextLine();
 
         // Check that the user input was valid. That is, no bigger groupings than 3-digits groupings.
         String [] numbers = number.split(" ");
-        for(String grouping : numbers) {
-            if(grouping.length()>3) {
+        for (String grouping : numbers) {
+            if (grouping.length() > 3) {
                 System.out.println("The phone number you typed contains one or more grouping of digits with a size of: " + grouping.length());
                 System.out.println("The maximum size of each grouping is 3 digits. Try again! ");
                 askUserForNumber();
@@ -158,8 +149,4 @@ public class NNIDemo {
         return number;
 
     }
-
-/*prwto vima input, deutero vima interpretation, trito vima validOrNot. mia methodo p legetai interpret. tha epistrefei enan arithmo(epeidi einai base level)
-kai meta kanei to greek validation.
-sto advanced level tha kanei to idio pragma alla tha epistrefei mia lista apo interpratations kai gia kathe mia apo autes, tha kanei to greek validation*/
 }
