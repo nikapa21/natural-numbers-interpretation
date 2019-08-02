@@ -158,6 +158,10 @@ public class Node {
         return rightChild;
     }
 
+    public void setParent(Node parent) {
+        this.parent = parent;
+    }
+
     public Node getParent() {
         return parent;
     }

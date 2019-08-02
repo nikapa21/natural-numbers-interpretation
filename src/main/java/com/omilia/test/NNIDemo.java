@@ -129,24 +129,12 @@ public class NNIDemo {
         return false;
     }
 
-    private static String askUserForNumber() {
+    public static String askUserForNumber() {
 
         Scanner sc = new Scanner(System.in);
 
         System.out.println("Please press the number! Every grouping of digits must be separated by a space ' ' char");
-        String number = sc.nextLine();
-
-        // Check that the user input was valid. That is, no bigger groupings than 3-digits groupings.
-        String [] numbers = number.split(" ");
-        for (String grouping : numbers) {
-            if (grouping.length() > 3) {
-                System.out.println("The phone number you typed contains one or more grouping of digits with a size of: " + grouping.length());
-                System.out.println("The maximum size of each grouping is 3 digits. Try again! ");
-                askUserForNumber();
-            }
-        }
-
-        return number;
+        return sc.nextLine();
 
     }
 }
